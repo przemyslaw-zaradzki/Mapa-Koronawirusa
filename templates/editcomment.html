@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Edit Comment</title> 
+{% endblock %}
+
+{% block body %}
+
+
+<div style="margin-left: 15%; margin-top: 5%;">
+    <h2>Edytuj:</h2>
+    <form action='/comment/edit/{{comment.id}}' method='POST'>
+        <p>
+            <label for="content">Treść:</label><br />
+            <textarea rows="4" cols="80" name='content' id='content' >{{comment.content}}</textarea>
+        </p>
+        <p>
+            <label for="title">Autor: </label><br />
+            <input type='text' name='author' id='author' value="{{comment.author}}" style="margin: 5px;">
+        </p>
+        <input type='submit' value='Zapisz'>
+    </form>
+</div>
+
+
+{% endblock %}

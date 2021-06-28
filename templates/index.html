@@ -1,0 +1,185 @@
+<html>
+
+<head>
+
+	<!-- Link do bootstrapa -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+	<meta name="generator" content="Jekyll v3.8.6">
+	<title>Koronawirus mapa</title>
+
+	<link rel="canonical" href="https://getbootstrap.com/docs/4.4/examples/starter-template/">
+
+	  <!-- Bootstrap core CSS -->
+	<link href="/docs/4.4/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<!-- Favicons -->
+	<link rel="apple-touch-icon" href="/docs/4.4/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
+	<link rel="icon" href="/docs/4.4/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
+	<link rel="icon" href="/docs/4.4/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
+	<link rel="manifest" href="/docs/4.4/assets/img/favicons/manifest.json">
+	<link rel="mask-icon" href="/docs/4.4/assets/img/favicons/safari-pinned-tab.svg" color="#563d7c">
+	<link rel="icon" href="/docs/4.4/assets/img/favicons/favicon.ico">
+	<meta name="msapplication-config" content="/docs/4.4/assets/img/favicons/browserconfig.xml">
+	<meta name="theme-color" content="#563d7c">
+
+
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
+
+	<style type="text/css">
+		.text-labels {
+					font-size: 2em;
+					font-weight: 700;
+					color: white;
+					/* Use color, background, set margins for offset, etc */
+				}	
+	</style>
+</head>
+
+<body>
+
+	<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" style="margin-bottom: 200px;">
+    <a class="navbar-brand" href="/">Mapa</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="/plot">Statystyki <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+		  <a class="nav-link 
+		  {% if(name!='') %} 
+				disabled 
+		  {% endif %}" 
+		  href="/login">Zaloguj się</a>
+        </li>
+        <li class="nav-item">
+		  <a class="nav-link 
+		  {% if(name=='') %} 
+				disabled 
+		  {% endif %}"
+		  href="/logout">Wyloguj się</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/signup">Nowe konto</a>
+        </li>
+        <li class="nav-item">
+        </li>        
+      </ul>
+		<h3 class="page-header" style="color:white;">{{ name }}</h3>
+    </div>
+  </nav>
+	<div  id="mapid" style="width: 100%; height: 100%; margin-top: 50px;"></div>
+</body>
+
+
+<script>
+
+var Akcje = L.layerGroup();
+
+var tab = [
+	{% for mark in markers %}
+		{ dlu: {{ mark.longitude }}, szer: {{ mark.latitude }}, tytuł: "{{ mark.title }}",  id: {{ mark.id }}  },
+	{% endfor %}
+	]
+
+	tab.map( (pop) => {
+		L.marker([ pop.szer, pop.dlu ]).addTo(Akcje).bindPopup( "<b>" + pop.tytuł + "</b><br>" +
+		"</br><a href=/marker/" + pop.id + ">więcej</a>");
+	})
+
+
+var cases_layer = L.layerGroup();
+
+var cases = [ 667, 761, 307, 915, 328, 3476, 724, 5763, 3076, 3657, 919, 884, 1004, 14558, 2596, 1105 ];
+	var Voivodeship_coordinates = [ 53.55, 15.35, 54.20, 18.15, 53.83, 20.82, 53.25, 23.06, 52.15, 15.37, 52.38, 17.02, 53.14, 18.48, 52.18, 21.21, 51.05, 16.38, 51.57, 19.39, 50.74, 20.85, 51.15, 22.90, 50.61, 17.86, 50.27, 18.87, 49.82, 20.17, 49.95, 22.10 ];
+	for(var i = 0; i < 16; i++) {
+
+	var radius = cases[i] + 25000;
+	var shift;
+	if( cases[i] < 1000) {
+		shift = -0.15;
+	} else if ( cases[i] < 10000 )
+	{
+		shift = -0.25;
+	} else {
+		shift = -0.3;
+	}
+
+	L.circle([ Voivodeship_coordinates[2*i] , Voivodeship_coordinates[2*i+1] ], radius, {
+		color: 'red',
+		fillColor: '#f03',
+		fillOpacity: 0.5			
+	}).addTo(cases_layer);
+
+	L.marker([ Voivodeship_coordinates[2*i] + 0.1 , Voivodeship_coordinates[2*i+1] + shift ], {
+				icon: L.divIcon({
+					className: 'text-labels',   // Set class for CSS styling
+					html: cases[i]
+				}),
+				zIndexOffset: 1000     // Make appear above other map features
+			}	
+		).addTo(cases_layer);
+
+	}
+
+
+var mbAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' + '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' + 'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+	mbUrl = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+
+	var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1, attribution: mbAttr})
+
+	var map = L.map('mapid', {
+		layers: [grayscale, Akcje, cases_layer],
+		maxBounds: [
+			[ 48.5, 14.0 ],
+			[ 55.0, 25.0 ]
+		],
+		minZoom: 7,
+		maxZoom: 9
+	}).setView([52.06, 19.15], 7);
+
+
+	var overlays = {
+		"Akcje": Akcje,
+		"Przypadki": cases_layer
+	};
+
+	L.control.layers(overlays).addTo(map);
+
+	var popup = L.popup();
+
+	function onMapClick(e) {
+
+		var latlng = e.latlng
+
+		popup
+			.setLatLng(e.latlng)
+			.setContent("<a href=/addmarker/LatLng(" + e.latlng.lat + "&" + e.latlng.lng +")>Dodaj nową akcję</a>")
+			.openOn(map);
+	}
+
+	map.on('click', onMapClick);
+
+</script>
+
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="/docs/4.4/assets/js/vendor/jquery.slim.min.js"><\/script>')</script>
+<script src="/docs/4.4/dist/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script>
+
+<!-- Link do bootstrapa -->
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+
+</html>

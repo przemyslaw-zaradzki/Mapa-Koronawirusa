@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Markers</title> 
+{% endblock %}
+
+{% block body %}
+
+<div style="margin-left: 15%; margin-top: 5%;">
+
+        <h1>{{ marker.title }}</h1>
+
+        {% if marker.author %}
+            <h3>Autor: {{ marker.author }}</h3>
+        {% else %}
+            <h3>Autor: N/A</h3>
+        {% endif %}
+        
+        <hr>
+        <textarea cols="120" rows="12">{{ marker.content }}</textarea>
+        <br />
+        <a href='/markers/delete/{{marker.id}}'>Usuń</a>
+        <a href='/markers/edit/{{marker.id}}'>Edytuj</a>
+    <hr>
+        <p>Udostępnij:</p>
+        <iframe src="https://www.facebook.com/plugins/share_button.php?href=http://marker/{{marker.id}}.com/&layout=button_count&size=large&mobile_iframe=true&width=83&height=28&appId" width="83" height="28" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
+    <hr>
+
+
+    {% for comment in comments %}
+
+    <p style="font-size: 24px;">{{ comment.content }}</p>
+
+    {% if comment.author %}
+        <h5>{{ comment.author }}</h3>
+    {% else %}
+        <h5>N/A</h3>
+    {% endif %}
+    
+    <a href='/comment/delete/{{comment.id}}'>Delete</a>
+    <a href='/comment/edit/{{comment.id}}'>Edit</a>
+    <hr>
+    {% endfor%}
+
+
+    <h2>Dodaj komentarz:</h2>
+    <form action='/marker/{{marker.id}}' method='POST'>
+        <textarea rows="4" cols="80" name='content' id='content' style="margin: 5px;"></textarea>
+        <br>
+        <input type='text' name='author' id='author' style="margin: 5px;">
+        Autor
+        <br>
+        <input type='submit' value='Dodaj' style="margin: 5px;">
+    </form>
+    <hr>
+</div>
+{% endblock %}

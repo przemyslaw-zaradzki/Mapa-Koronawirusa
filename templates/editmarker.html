@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Edit Marker</title> 
+{% endblock %}
+
+{% block body %}
+
+<div style="margin-left: 15%; margin-top: 5%;">
+    <h2>Edytuj:</h2>
+    <form action='/markers/edit/{{marker.id}}' method='POST'>
+        <p>
+            <label for="title">Tytuł: </label><br />
+            <input type='text' name='title' id='title' value="{{marker.title}}">
+        </p>
+        <p>
+            <label for="title">Autor: </label><br />
+            <input type='text' name='author' id='author' value="{{marker.author}}">
+        </p>
+        <p>
+            <label for="content">Opis:</label><br />
+            <textarea rows="4" cols="80" name='content' id='content' >{{marker.content}}</textarea>
+        </p>
+        <p>
+            <label for="longitude">Długość geograficzna:</label><br />
+            <input type='text' name='longitude' id='longitude' value="{{marker.longitude}}">        
+        </p>
+        <p>
+            <label for="longitude">Szerokość geograficzna</label><br />
+            <input type='text' name='latitude' id='latitude' value="{{marker.latitude}}">       
+        </p>
+        <input type='submit' value='Zapisz'>
+    </form>
+</div>
+{% endblock %}
